@@ -1,0 +1,13 @@
+spring:
+  datasource:  # 使用内存数据库h2
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=Mysql;TRACE_LEVEL_SYSTEM_OUT=2;
+    password: sa
+    username: sa
+  autoconfigure: # 关闭LiquibaseAutoConfiguration和KafkaAutoConfiguration的自动化配置
+    exclude: org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
+  h2:
+    console:
+      enabled: true
+liquibase:
+  dir: src/main/resources/liquibase
+  drop: true
