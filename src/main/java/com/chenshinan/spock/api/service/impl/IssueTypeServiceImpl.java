@@ -41,9 +41,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public IssueTypeDTO create(Long organizationId, IssueTypeDTO issueTypeDTO) {
-        if (!checkName(organizationId, issueTypeDTO.getName(), null)) {
-            throw new CsnException("error.issueType.checkName");
-        }
         issueTypeDTO.setOrganizationId(organizationId);
         IssueType issueType = modelMapper.map(issueTypeDTO, IssueType.class);
         if (issueTypeMapper.insert(issueType) != 1) {
@@ -55,9 +52,6 @@ public class IssueTypeServiceImpl implements IssueTypeService {
 
     @Override
     public IssueTypeDTO update(IssueTypeDTO issueTypeDTO) {
-        if (issueTypeDTO.getName() != null && !checkName(issueTypeDTO.getOrganizationId(), issueTypeDTO.getName(), issueTypeDTO.getId())) {
-            throw new CsnException("error.issueType.checkName");
-        }
         IssueType issueType = modelMapper.map(issueTypeDTO, IssueType.class);
         int isUpdate = issueTypeMapper.updateByPrimaryKeySelective(issueType);
         if (isUpdate != 1) {
@@ -68,42 +62,10 @@ public class IssueTypeServiceImpl implements IssueTypeService {
     }
 
     @Override
-    public Map<String, Object> checkDelete(Long organizationId, Long issueTypeId) {
-        Map<String, Object> result = new HashMap<>();
-        result.put("canDelete", true);
-        IssueType issueType = issueTypeMapper.selectByPrimaryKey(issueTypeId);
-        if (issueType == null) {
-            throw new CsnException("error.base.notFound");
-        } else if (!issueType.getOrganizationId().equals(organizationId)) {
-            throw new CsnException("error.issueType.illegal");
-        }
-        return result;
-    }
-
-    @Override
     public Boolean delete(Long organizationId, Long issueTypeId) {
-        Map<String, Object> result = checkDelete(organizationId, issueTypeId);
-        Boolean canDelete = (Boolean) result.get("canDelete");
-        if (canDelete) {
-            int isDelete = issueTypeMapper.deleteByPrimaryKey(issueTypeId);
-            if (isDelete != 1) {
-                throw new CsnException("error.state.delete");
-            }
-        } else {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public Boolean checkName(Long organizationId, String name, Long id) {
-        IssueType select = new IssueType();
-        select.setName(name);
-        select.setOrganizationId(organizationId);
-        select = issueTypeMapper.selectOne(select);
-        if (select != null) {
-            //若传了id，则为更新校验（更新校验不校验本身），不传为创建校验返回false
-            return select.getId().equals(id);
+        int isDelete = issueTypeMapper.deleteByPrimaryKey(issueTypeId);
+        if (isDelete != 1) {
+            throw new CsnException("error.state.delete");
         }
         return true;
     }

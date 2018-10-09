@@ -1,9 +1,6 @@
 package com.chenshinan.spock.domain;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.math.BigDecimal;
 
 /**
@@ -13,7 +10,7 @@ import java.math.BigDecimal;
 @Table(name = "issue_type")
 public class IssueType {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "Mysql")
     private Long id;
 
     private String icon;

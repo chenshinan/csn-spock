@@ -18,7 +18,7 @@ import java.util.Optional;
  * @date 2018/9/24
  */
 @RestController
-@RequestMapping(value = "issue_type/{organization_id}")
+@RequestMapping(value = "csn/{organization_id}/issue_type")
 public class SpockController {
 
     @Autowired
@@ -45,18 +45,6 @@ public class SpockController {
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Boolean> delete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") Long issueTypeId) {
         return new ResponseEntity<>(issueTypeService.delete(organizationId, issueTypeId), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/check_delete/{id}")
-    public ResponseEntity<Map<String, Object>> checkDelete(@PathVariable("organization_id") Long organizationId, @PathVariable("id") Long issueTypeId) {
-        return new ResponseEntity<>(issueTypeService.checkDelete(organizationId, issueTypeId), HttpStatus.OK);
-    }
-
-    @GetMapping(value = "/check_name")
-    public ResponseEntity<Boolean> checkName(@PathVariable("organization_id") Long organizationId,
-                                             @RequestParam("name") String name,
-                                             @RequestParam(value = "id", required = false) Long id) {
-        return new ResponseEntity<>(issueTypeService.checkName(organizationId, name, id), HttpStatus.OK);
     }
 
     @GetMapping(value = "/types")

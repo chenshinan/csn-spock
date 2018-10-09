@@ -19,9 +19,5 @@ public interface IssueTypeService {
 
     Boolean delete(Long organizationId, Long issueTypeId);
 
-    Map<String, Object> checkDelete(Long organizationId, Long issueTypeId);
-
-    Boolean checkName(Long organizationId, String name, Long id);
-
     List<IssueTypeDTO> queryByOrgId(Long organizationId);
 }

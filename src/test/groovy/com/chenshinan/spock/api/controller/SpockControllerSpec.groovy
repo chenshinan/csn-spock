@@ -1,8 +1,10 @@
 package com.chenshinan.spock.api.controller
 
 import com.chenshinan.spock.api.dto.IssueTypeDTO
+import com.chenshinan.spock.api.service.IssueTypeService
 import com.chenshinan.spock.config.IntegrationTestConfiguration
 import com.chenshinan.spock.domain.IssueType
+import com.chenshinan.spock.infra.mapper.IssueTypeMapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
@@ -22,11 +24,20 @@ class SpockControllerSpec extends Specification {
     @Autowired
     TestRestTemplate restTemplate
 
-    @Shared
-    Long orginzationId = 1L;
+    @Autowired
+    IssueTypeService issueTypeService
+
+    @Autowired
+    IssueTypeMapper issueTypeMapper;
 
     @Shared
-    String baseUrl = '/spock'
+    Long testOrginzationId = 1L
+
+    @Shared
+    List<IssueTypeDTO> list = new ArrayList()
+
+    @Shared
+    String baseUrl = '/csn/{organization_id}/issue_type'
 
     /**
      * 测试编写说明：
@@ -54,8 +65,8 @@ class SpockControllerSpec extends Specification {
 
     def cleanup() {
         IssueType del = new IssueType()
-        issueTypeService.delete(del);//清空数据
-        list.clear();
+        issueTypeMapper.delete(del)
+        list.clear()
     }
 
     def "create"() {
@@ -89,10 +100,9 @@ class SpockControllerSpec extends Specification {
         where: '测试用例：'
         name         | icon    | description    || expRequest | expResponse
         'name1'      | 'icon1' | 'description1' || true       | true
-        null         | 'icon1' | 'description1' || true       | false
+        null         | 'icon1' | 'description1' || false       | false
         'name1'      | null    | 'description1' || true       | true
         'name1'      | 'icon1' | null           || true       | true
-        'init_name1' | 'icon1' | 'description1' || true       | false
     }
 
     def "update"() {
@@ -126,41 +136,9 @@ class SpockControllerSpec extends Specification {
         where: '测试用例：'
         name         | icon    | description    || expRequest | expResponse
         'name1'      | 'icon1' | 'description1' || true       | true
-        null         | 'icon1' | 'description1' || true       | false
+        null         | 'icon1' | 'description1' || false       | false
         'name1'      | null    | 'description1' || true       | true
         'name1'      | 'icon1' | null           || true       | true
-        'init_name2' | 'icon1' | 'description1' || true       | false
-    }
-
-    def "checkDelete"() {
-        given: '准备工作'
-        def issueTypeId = id
-
-        when: '校验问题类型是否可以删除'
-        def entity = restTemplate.exchange(baseUrl + "/check_delete/{id}", HttpMethod.GET, null, Map, testOrginzationId, issueTypeId)
-
-        then: '状态码为200，调用成功'
-
-        def actRequest = false
-        def actResponse = false
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                if (entity.getBody() != null) {
-                    if (entity.getBody().get('canDelete') != null) {
-                        actResponse = entity.getBody().get('canDelete')
-                    }
-                }
-            }
-        }
-        actRequest == expRequest
-        actResponse == expResponse
-
-        where: '测试用例：'
-        id     || expRequest | expResponse
-        '1'    || true       | true
-        '9999' || true       | false
-        null   || false      | false
     }
 
     def "delete"() {
@@ -187,43 +165,8 @@ class SpockControllerSpec extends Specification {
         where: '测试用例：'
         id     || expRequest | expResponse
         '1'    || true       | true
-        '9999' || true       | false
+        '9999' || false       | false
         null   || false      | false
-    }
-
-    def "checkName"() {
-        given: '准备工作'
-        def url = baseUrl + "/check_name?1=1"
-        if (name != null) {
-            url = url + "&name=" + name
-        }
-        if (id != null) {
-            url = url + "&id=" + id
-        }
-
-        when: '校验问题类型名字是否未被使用'
-        def entity = restTemplate.exchange(url, HttpMethod.GET, null, Boolean.class, testOrginzationId)
-
-        then: '状态码为200，调用成功'
-
-        def actRequest = false
-        def actResponse = false
-        if (entity != null) {
-            if (entity.getStatusCode().is2xxSuccessful()) {
-                actRequest = true
-                actResponse = entity.getBody()
-            }
-        }
-        actRequest == expRequest
-        actResponse == expResponse
-//        then:
-//        thrown(Exception)
-
-        where: '测试用例：'
-        name         | id   || expRequest | expResponse
-        'init_name1' | null || true       | false
-        'init_name1' | '1'  || true       | true
-        'name1'      | null || true       | true
     }
 
     def "queryByOrgId"() {
@@ -280,6 +223,6 @@ class SpockControllerSpec extends Specification {
         id     || expRequest | expResponse
         '1'    || true       | true
         '9999' || true       | false
-        null   || true       | false
+        null   || false      | false
     }
 }
